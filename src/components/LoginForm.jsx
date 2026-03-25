@@ -1,22 +1,20 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { loginSchema } from "@/lib/loginSchema";
+import { useNavigate } from "react-router";
 import { useAuthStore } from "@/store/useAuthStore";
+import { loginSchema } from "@/lib/loginSchema";
 import { Input } from "./ui/input";
 
 export default function LoginForm() {
   const login = useAuthStore((state) => state.login);
+  const navigate = useNavigate();
 
-  const form = useForm({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
   });
@@ -25,44 +23,36 @@ export default function LoginForm() {
     console.log("Validated Data:", data);
     login("fake-jwt-token-123");
     alert("Login successful! Token stored.");
+    navigate("/cart");
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 border rounded-lg shadow-sm">
-      <h2 className="text-2xl font-bold mb-6">Login Form</h2>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input placeholder="ahmed@iti.gov.eg" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <Input type="password" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="submit" className="w-full">
-            Sign In
-          </Button>
-        </form>
-      </Form>
+    <div className="max-w-md mx-auto mt-20 p-6 border rounded-lg shadow-sm">
+      <h2 className="text-2xl font-bold mb-6">Login</h2>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {/* Email */}
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-medium">Email</label>
+          <Input type="email" placeholder="ahmed@iti.gov.eg" {...register("email")} />
+          {errors.email && (
+            <p className="text-sm text-red-500">{errors.email.message}</p>
+          )}
+        </div>
+
+        {/* Password */}
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-medium">Password</label>
+          <Input type="password" placeholder="********" {...register("password")} />
+          {errors.password && (
+            <p className="text-sm text-red-500">{errors.password.message}</p>
+          )}
+        </div>
+
+        <Button type="submit" className="w-full">
+          Sign In
+        </Button>
+      </form>
     </div>
   );
 }
